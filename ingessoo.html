@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galeria de Imagens em A4</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+        .page {
+            width: 210mm; /* Largura A4 */
+            height: 297mm; /* Altura A4 */
+            background-color: white;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 10mm; /* Padding para ajuste visual */
+            box-sizing: border-box;
+            page-break-after: always; /* Quebra de página para impressão */
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start; /* Alinhamento à esquerda */
+        }
+        .image {
+            width: calc(20% - 20px); /* 5 imagens por linha com espaço */
+            margin-bottom: 20px;
+        }
+        .image img {
+            width: 100%; /* Imagem ocupa 100% da largura do contêiner */
+            height: auto;
+            border-radius: 5px;
+        }
+        .button-container {
+            margin-bottom: 20px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+<h1>Galeria de Imagens em A4</h1>
+<div class="button-container">
+    <input type="file" id="fileInput" multiple accept="image/*">
+    <button id="saveButton">Salvar como PDF</button>
+</div>
+<div class="container" id="imageContainer"></div>
+
+<script>
+    const { jsPDF } = window.jspdf;
+
+    const fileInput = document.getElementById('fileInput');
+    const imageContainer = document.getElementById('imageContainer');
+
+    // Dimensões da página A4 em mm
+    const pageWidth = 210;
+    const pageHeight = 297;
+    const margin = 10; // Margem em mm
+    const imageSize = (pageWidth - 2 * margin) / 5; // Tamanho calculado para 5 imagens por linha
+
+    fileInput.addEventListener('change', function(event) {
+        const files = event.target.files;
+
+        // Limpa o contêiner antes de adicionar novas imagens
+        imageContainer.innerHTML = '';
+
+        const page = document.createElement('div');
+        page.className = 'page';
+
+        for (const file of files) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imageDiv = document.createElement('div');
+                imageDiv.className = 'image';
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.alt = file.name;
+
+                imageDiv.appendChild(img);
+                page.appendChild(imageDiv);
+
+                // Adiciona a página ao contêiner após a primeira imagem
+                if (!imageContainer.contains(page)) {
+                    imageContainer.appendChild(page);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    document.getElementById('saveButton').addEventListener('click', () => {
+        const pdf = new jsPDF('portrait', 'mm', 'a4');
+        const images = document.querySelectorAll('.image img');
+
+        let y = margin; // Início da altura com margem superior
+        let x = margin; // Início da largura com margem esquerda
+
+        images.forEach((img, index) => {
+            const imgData = img.src;
+            pdf.addImage(imgData, 'JPEG', x, y, imageSize, imageSize); // Adiciona imagem com tamanho adequado
+
+            // Atualiza a posição para a próxima imagem
+            if ((index + 1) % 5 === 0) {
+                // Nova linha a cada 5 imagens
+                x = margin; // Reinicia x
+                y += imageSize + 5; // Move y para a próxima linha, com 5mm de espaçamento
+            } else {
+                // Move x para a próxima imagem na mesma linha
+                x += imageSize + 5; // 5mm de espaçamento entre as imagens
+            }
+
+            // Se chegar ao final da página, adiciona nova página
+            if (y + imageSize > pageHeight - margin) {
+                pdf.addPage();
+                y = margin; // Reinicia y
+                x = margin; // Reinicia x
+            }
+        });
+
+        // Salva o arquivo PDF
+        pdf.save('galeria_imagens.pdf');
+    });
+</script>
+
+</body>
+</html>
