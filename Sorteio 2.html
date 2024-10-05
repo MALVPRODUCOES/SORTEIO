@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorteio de Comentários</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        textarea, button, input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .comments {
+            margin-top: 20px;
+            text-align: left;
+            font-size: 1em;
+        }
+        .winner {
+            margin-top: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Sorteio de Comentários</h1>
+        <input type="text" id="postLink" placeholder="Insira o link da publicação do Instagram">
+        <p>Agora, copie e cole os comentários da postagem abaixo (um por linha):</p>
+        <textarea id="comments" rows="10" placeholder="Ex: Nome1&#10;Nome2&#10;Nome3"></textarea>
+        <button onclick="exibirComentarios()">Exibir Comentários</button>
+        <div class="comments" id="commentsList"></div>
+        <button onclick="sortear()">Sortear</button>
+
+        <div class="winner" id="winner"></div>
+    </div>
+
+    <script>
+        function exibirComentarios() {
+            const comments = document.getElementById('comments').value.trim().split('\n');
+            const commentsList = document.getElementById('commentsList');
+            commentsList.innerHTML = '';
+
+            if (comments.length === 0 || comments[0] === '') {
+                alert('Por favor, insira ao menos um nome ou comentário.');
+                return;
+            }
+
+            comments.forEach((comment) => {
+                const commentItem = document.createElement('p');
+                commentItem.textContent = comment.trim();
+                commentsList.appendChild(commentItem);
+            });
+        }
+
+        function sortear() {
+            const comments = document.getElementById('comments').value.trim().split('\n');
+            if (comments.length === 0 || comments[0] === '') {
+                alert('Por favor, insira ao menos um nome ou comentário.');
+                return;
+            }
+
+            const winnerIndex = Math.floor(Math.random() * comments.length);
+            const winner = comments[winnerIndex].trim();
+
+            document.getElementById('winner').textContent = `O vencedor é: ${winner}`;
+        }
+    </script>
+
+</body>
+</html>
